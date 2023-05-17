@@ -9,10 +9,10 @@ export const choose_text = 'What do u want to do?\n' +
     '1. Add task to choosed user.\n' +
     '2. Change user data.\n' +
     '3. Create new project.\n' +
-    '4. Change task status.\n' +
+    '4. Change task or subtask status.\n' +
     '5. Display users tasks anf projects info.\n' +
-    '6. Delete project or task.\n' +
-    '7. Set tasks priority.\n' +
+    '6. Delete project, task or subtask.\n' +
+    '7. Set tasks or subtasks priority.\n' +
     '8. Sign in.\n' +
     '9. Add comment to project.\n' +
     '10. Delete comment.\n' +

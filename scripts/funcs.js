@@ -1,6 +1,7 @@
 import { Task } from './classes.js'
 import { Project } from './classes.js'
 import { User } from './classes.js'
+import { Subtask } from './classes.js'
 import { users } from './classes.js'
 import { mainMenu } from './main-menu.js'
 import { Priority } from './classes.js'
@@ -88,14 +89,16 @@ export function addTaskToCurrentUser() {
 
 }
 
+
 // Функция создания задачи
 export function createTask(currentUser, project) {
     const title = prompt("Введите название задачи:");
     const description = prompt("Введите описание задачи:");
     const deadline = prompt("Введите крайний срок выполнения задачи:");
+    const typeChoice = prompt("Выберите тип задачи:\n 1. Встреча\n 2. Событие\n 3. Работа\n 4. Учеба\n 5. Вечиринка\n 6. Торжественное мероприятие\n")
     const priorityChoice = prompt("Выберите приоритет задачи:\n 1. Важная\n 2. Срочная\n 3. Несрочная\n 4. Неважная")
     let priority;
-
+    let type;
     switch (priorityChoice) {
         case "1":
             priority = "Важная";
@@ -113,11 +116,36 @@ export function createTask(currentUser, project) {
             console.log("Неверный выбор приоритета!");
             return;
     }
-    const task = new Task(title, description, deadline, priority);
-    project.addTask(task);
 
+    switch (typeChoice) {
+        case "1":
+            type = "Встреча";
+            break;
+        case "2":
+            type = "Событие";
+            break;
+        case "3":
+            type = "Работа";
+            break;
+        case "4":
+            type = "Учеба";
+            break;
+        case "5":
+            type = "Вечиринка";
+            break;
+        case "6":
+            type = "Торжественное мероприятие";
+            break;
+        default:
+            console.log("Неверный выбор приоритета!");
+            return;
+    }
+    const task = new Task(title, description, deadline, priority, type);
+    task.addSubtasks();
+    project.addTask(task);
     console.log(`Задача "${title}" успешно добавлена в проект "${project.name}" пользователя "${currentUser.name}"!`);
 }
+
 
 // Функция создания проекта
 export function createProject() {
@@ -141,6 +169,7 @@ export function createProject() {
         console.log("Неверный ввод")
     }
 }
+
 
 // Функция добавления комментария
 export function addCommentToProject() {
@@ -180,6 +209,7 @@ export function addCommentToProject() {
         }
     }
 }
+
 
 // Функция удаления комментария
 export function removeProjectComment() {
@@ -224,6 +254,7 @@ export function removeProjectComment() {
     console.log("Комментарий успешно удален");
 }
 
+
 // Функция изменения статуса задачи
 export function changeTaskStatus() {
     const currentUser = checkUserForProjects();
@@ -242,6 +273,12 @@ export function changeTaskStatus() {
             project.tasks.forEach((task, taskIndex) => {
                 const status = task.completed ? '[Завершено]' : '[Ожидает выполнения]';
                 console.log(`  Задача ${taskIndex}: ${task.title}, ${status}`);
+                if (task.subtasks.length > 0) {
+                    task.subtasks.forEach((subtask, subtaskIndex) => {
+                        const subtaskStatus = subtask.completed ? '[Завершено]' : '[Ожидает выполнения]';
+                        console.log(`    Подзадача ${subtaskIndex}: ${subtask.title}, ${subtaskStatus}`);
+                    });
+                }
             });
         }
     });
@@ -267,24 +304,60 @@ export function changeTaskStatus() {
         else {
             const task = project.tasks[taskIndex];
 
-            if (task.completed == false) {
-                const isCompleted = confirm("Задача выполнена? Нажмите 'ОК' для выполненной задачи или 'Отмена' для ожидающей выполнения задачи.");
-                task.completed = isCompleted;
-                const status = isCompleted ? "выполнена" : "ожидает выполнения";
+            const changeTaskStatusChoice = confirm("Хотите изменить статус готовности задачи?");
+            if (changeTaskStatusChoice && project.tasks.length > 0) {
+                const taskIndex = prompt("Введите индекс задачи (от 0 до " + (project.tasks.length - 1) + "):");
+                const taskIndexNum = parseInt(taskIndex);
+                if (taskIndexNum > project.tasks.length - 1 || taskIndexNum < 0) {
+                    console.log("Неверный ввод");
+                } else {
+                    if (task.completed == false) {
+                        const isCompleted = confirm("Задача выполнена? Нажмите 'ОК' для выполненной задачи или 'Отмена' для ожидающей выполнения задачи.");
+                        task.completed = isCompleted;
+                        const status = isCompleted ? "выполнена" : "ожидает выполнения";
 
-                console.log(`Состояние задачи "${task.title}" изменено на "${status}"!`);
-            }
-            else {
-                const isCompleted = confirm("Задача не выполнена? Нажмите 'ОК' для изменения статуса задачи на 'ожидает выполнения' или 'Отмена' для отмены изменения статуса.");
-                task.completed = !isCompleted;
-                const status = isCompleted ? "ожидает выполнения" : "выполнена";
+                        console.log(`Состояние задачи "${task.title}" изменено на "${status}"!`);
+                    }
+                    else {
+                        const isCompleted = confirm("Задача не выполнена? Нажмите 'ОК' для изменения статуса задачи на 'ожидает выполнения' или 'Отмена' для отмены изменения статуса.");
+                        task.completed = !isCompleted;
+                        const status = isCompleted ? "ожидает выполнения" : "выполнена";
 
-                console.log(`Состояние задачи "${task.title}" изменено на "${status}"!`);
+                        console.log(`Состояние задачи "${task.title}" изменено на "${status}"!`);
+                    }
+                }
             }
+
+            const changeSubtaskStatusChoice = confirm("Хотите изменить статус готовности подзадачи?");
+            if (changeSubtaskStatusChoice && task.subtasks.length > 0) {
+                const subtaskIndex = prompt("Введите индекс подзадачи (от 0 до " + (task.subtasks.length - 1) + "):");
+                const subtaskIndexNum = parseInt(subtaskIndex);
+                if (subtaskIndexNum > task.subtasks.length - 1 || subtaskIndexNum < 0) {
+                    console.log("Неверный ввод");
+                } else {
+                    const subtask = task.subtasks[subtaskIndex];
+
+                    if (subtask.completed == false) {
+                        const isCompleted = confirm("Подзадача выполнена? Нажмите 'ОК' для выполненной подзадачи или 'Отмена' для ожидающей выполнения подзадачи.");
+                        subtask.completed = isCompleted;
+                        const status = isCompleted ? "выполнена" : "ожидает выполнения";
+
+                        console.log(`Состояние подзадачи "${subtask.title}" изменено на "${status}"!`);
+                    } else {
+                        const isCompleted = confirm("Подзадача не выполнена? Нажмите 'ОК' для изменения статуса подзадачи на 'ожидает выполнения' или 'Отмена' для отмены изменения статуса.");
+                        subtask.completed = !isCompleted;
+                        const status = isCompleted ? "ожидает выполнения" : "выполнена";
+
+                        console.log(`Состояние подзадачи "${subtask.title}" изменено на "${status}"!`);
+                    }
+                }
+            }
+
+
         }
-
-
     }
+
+
 }
 
 
@@ -302,6 +375,7 @@ export function displayUserTasksAndProjectsInfo() {
             });
         }
     });
+
     const choice = prompt("Выберите действие:\n1. Просмотреть задачу\n2. Просмотреть проект");
     if (choice === "1") {
         const projectIndex = prompt("Введите индекс проекта пользователя (от 0 до " + (currentUser.projects.length - 1) + "):");
@@ -321,10 +395,22 @@ export function displayUserTasksAndProjectsInfo() {
             else {
                 const task = project.tasks[taskIndex];
                 console.log(`Описание задачи "${task.title}": ${task.description}`);
+                console.log(`Тип задачи: ${task.type}`)
                 console.log(`Время выполнения: ${task.deadline}`);
                 console.log(`Приоритет: ${task.priority}`)
                 const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
                 console.log(`Статус: ${status}`)
+                if (task.subtasks.length === 0) {
+                    console.log("Нет подзадач");
+                } else {
+                    task.subtasks.forEach((subtask, subtaskIndex) => {
+                        console.log(`Подзадача ${subtaskIndex}: ${subtask.title}`);
+                        console.log(`   Дата: ${subtask.dueDate}`);
+                        console.log(`   Описание: ${subtask.description}`);
+                        console.log(`   Тип подзадачи: ${subtask.type}`)
+                        console.log(`   Готовность: ${subtask.completed ? 'Завершено' : 'Ожидает выполнения'}`);
+                    });
+                }
             }
         }
     } else if (choice === "2") {
@@ -355,8 +441,22 @@ export function displayUserTasksAndProjectsInfo() {
 
                     console.log(`Вы выбрали задачу "${task.title}"`);
                     console.log(`Описание задачи: ${task.description}`);
+                    console.log(`Тип задачи: ${task.type}`)
                     console.log(`Время выполнения: ${task.deadline}`);
                     console.log(`Приоритет: ${task.priority}`)
+                    const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
+                    console.log(`Статус: ${status}`)
+                    if (task.subtasks.length === 0) {
+                        console.log("Нет подзадач");
+                    } else {
+                        task.subtasks.forEach((subtask, subtaskIndex) => {
+                            console.log(`Подзадача ${subtaskIndex}: ${subtask.title}`);
+                            console.log(`   Дата: ${subtask.dueDate}`);
+                            console.log(`   Описание: ${subtask.description}`);
+                            console.log(`   Тип подзадачи: ${subtask.type}`)
+                            console.log(`   Готовность: ${subtask.completed ? 'Завершено' : 'Ожидает выполнения'}`);
+                        });
+                    }
                 }
             }
         }
@@ -364,7 +464,6 @@ export function displayUserTasksAndProjectsInfo() {
         console.log("Неверный выбор!");
     }
 }
-
 
 
 // Функция изменения данных проектов и задач
@@ -466,6 +565,7 @@ export function changeCurrentUserData() {
     }
 }
 
+
 // Функция удаления проекта или задачи
 export function deleteItem() {
     const currentUser = checkUserForProjects();
@@ -483,12 +583,20 @@ export function deleteItem() {
         } else {
             project.tasks.forEach((task, taskIndex) => {
                 console.log(`  Задача ${taskIndex}: ${task.title}`);
-                console.log(`  Приоритет: ${task.priority}`)
+                console.log(`  Приоритет: ${task.priority}`);
+                if (task.subtasks.length > 0) {
+                    console.log("    Подзадачи:");
+                    task.subtasks.forEach((subtask, subtaskIndex) => {
+                        console.log(`    Подзадача ${subtaskIndex}: ${subtask.title}`);
+                    });
+                } else {
+                    console.log("    Нет подзадач");
+                }
             });
         }
     });
 
-    const choice = prompt("Что вы хотите удалить?\n1. Проект\n2. Задачу");
+    const choice = prompt("Что вы хотите удалить?\n1. Проект\n2. Задачу\n3. Подзадачу");
 
     if (choice === "1") {
         const projectIndex = prompt("Введите индекс проекта (от 0 до " + (currentUser.projects.length - 1) + "):");
@@ -526,10 +634,53 @@ export function deleteItem() {
                 console.log(`Задача "${task.title}" удалена.`);
             }
         }
+    } else if (choice === "3") {
+        const projectIndex = prompt(
+            "Введите индекс проекта (от 0 до " + (currentUser.projects.length - 1) + "):"
+        );
+        const projectIndexNum = parseInt(projectIndex);
+        if (projectIndexNum > currentUser.projects.length - 1 || projectIndexNum < 0) {
+            console.log("Неверный ввод");
+        } else {
+            const project = currentUser.projects[projectIndex];
+
+            if (project.tasks.length === 0) {
+                console.log("В выбранном проекте нет задач.");
+                mainMenu();
+            }
+
+            const taskIndex = prompt(
+                "Введите индекс задачи (от 0 до " + (project.tasks.length - 1) + "):"
+            );
+            const taskIndexNum = parseInt(taskIndex);
+            if (taskIndexNum > project.tasks.length - 1 || taskIndexNum < 0) {
+                console.log("Неверный ввод");
+            } else {
+                const task = project.tasks[taskIndex];
+
+                if (task.subtasks.length === 0) {
+                    console.log("В выбранной задаче нет подзадач.");
+                    mainMenu();
+                }
+
+                const subtaskIndex = prompt(
+                    "Введите индекс подзадачи (от 0 до " + (task.subtasks.length - 1) + "):"
+                );
+                const subtaskIndexNum = parseInt(subtaskIndex);
+                if (subtaskIndexNum > task.subtasks.length - 1 || subtaskIndexNum < 0) {
+                    console.log("Неверный ввод");
+                } else {
+                    const subtask = task.subtasks[subtaskIndexNum];
+                    task.subtasks.splice(subtaskIndexNum, 1);
+                    console.log(`Подзадача "${subtask.title}" удалена.`);
+                }
+            }
+        }
     } else {
         console.log("Неверный выбор!");
     }
 }
+
 
 // Фкункция выставления приоритета задачи
 export function setTaskPriority() {
@@ -594,3 +745,4 @@ export function setTaskPriority() {
         }
     }
 }
+
