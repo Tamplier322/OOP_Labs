@@ -310,48 +310,208 @@ function addCommentToSubtaskPrompt(projects, currentUser) {
 
 
 // Функция удаления комментария
-export function removeProjectComment() {
+export function removeCommentPrompt() {
     const currentUser = checkUserForProjects();
+
+    if (currentUser.projects.length === 0) {
+        console.log("У текущего пользователя нет проектов.");
+        return;
+    }
 
     console.log(`Задачи пользователя ${currentUser.name}:`);
     currentUser.projects.forEach((project, projectIndex) => {
         console.log(`Проект ${projectIndex}: ${project.name}`);
-        console.log("Комментарии к проекту:");
-        if (project.comments.length === 0) {
-            console.log("  Нет комментариев");
+        if (project.tasks.length === 0) {
+            console.log("  Нет задач");
         } else {
-            project.comments.forEach((comment, commentIndex) => {
-                console.log(`  Комментарий ${commentIndex}: ${comment}`);
+            project.tasks.forEach((task, taskIndex) => {
+                console.log(`  Задача ${taskIndex}: ${task.title}`);
+                console.log(`  Приоритет: ${task.priority}`)
+                if (task.subtasks.length > 0) {
+                    task.subtasks.forEach((subtask, subtaskIndex) => {
+                        console.log(`    Подзадача ${subtaskIndex}: ${subtask.title}`);
+                    });
+                }
             });
         }
     });
 
-    const projectIndex = prompt(
-        "Введите индекс проекта пользователя (от 0 до " +
-        (currentUser.projects.length - 1) +
-        "):"
-    );
+    const choice = prompt("Выберите, чего вы хотите удалить комментарий:\n1. Проект\n2. Задача\n3. Подзадача");
+    checkNull(choice);
+
+    switch (choice) {
+        case "1":
+            removeCommentFromProjectPrompt(currentUser.projects, currentUser);
+            break;
+        case "2":
+            removeCommentFromTaskPrompt(currentUser.projects, currentUser);
+            break;
+        case "3":
+            removeCommentFromSubtaskPrompt(currentUser.projects, currentUser);
+            break;
+        default:
+            console.log("Неверный ввод.");
+    }
+}
+
+//
+function removeCommentFromProjectPrompt(projects, currentUser) {
+    const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
     checkNull(projectIndex);
-    const project = currentUser.projects[projectIndex];
-    if (!project) {
-        console.log("Неверный индекс проекта");
+    const projectIndexNum = parseInt(projectIndex);
+    if (projectIndexNum > projects.length - 1 || projectIndexNum < 0) {
+        console.log("Неверный ввод");
+    } else {
+        const project = projects[projectIndexNum];
+        if (project.comments.length === 0) {
+            console.log("В выбранном проекте нет комментариев.");
+            return;
+        }
+        console.log("Комментарии к проекту:");
+        project.comments.forEach((comment, commentIndex) => {
+            console.log(`Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author})`);
+        });
+        const commentIndex = prompt("Введите индекс комментария (от 0 до " + (project.comments.length - 1) + "):");
+        checkNull(commentIndex);
+        const commentIndexNum = parseInt(commentIndex);
+        if (commentIndexNum > project.comments.length - 1 || commentIndexNum < 0) {
+            console.log("Неверный ввод");
+        } else {
+            project.removeComment(commentIndexNum);
+            console.log("Комментарий успешно удален.");
+        }
+    }
+}
+
+function removeCommentFromTaskPrompt(projects, currentUser) {
+    const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
+    checkNull(projectIndex);
+    const projectIndexNum = parseInt(projectIndex);
+    if (projectIndexNum > projects.length - 1 || projectIndexNum < 0) {
+        console.log("Неверный ввод");
+    } else {
+        const project = projects[projectIndexNum];
+        if (project.tasks.length === 0) {
+            console.log("В выбранном проекте нет задач.");
+            return;
+        }
+        console.log(`Задачи проекта "${project.name}":`);
+        project.tasks.forEach((task, taskIndex) => {
+            console.log(`Задача ${taskIndex}: ${task.title}`);
+            if (task.comments.length === 0) {
+                console.log("  Нет комментариев");
+            } else {
+                console.log(`  Комментарии к задаче "${task.title}":`);
+                task.comments.forEach((comment, commentIndex) => {
+                    console.log(`    Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author})`);
+                });
+            }
+        });
+        const taskIndex = prompt("Введите индекс задачи (от 0 до " + (project.tasks.length - 1) + "):");
+        checkNull(taskIndex);
+        const taskIndexNum = parseInt(taskIndex);
+        if (taskIndexNum > project.tasks.length - 1 || taskIndexNum < 0) {
+            console.log("Неверный ввод");
+        } else {
+            const task = project.tasks[taskIndexNum];
+            if (task.comments.length === 0) {
+                console.log("Выбранная задача не имеет комментариев.");
+                return;
+            }
+            console.log("Комментарии к выбранной задаче:");
+            task.comments.forEach((comment, commentIndex) => {
+                console.log(`Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author})`);
+            });
+            const commentIndex = prompt("Введите индекс комментария (от 0 до " + (task.comments.length - 1) + "):");
+            checkNull(commentIndex);
+            const commentIndexNum = parseInt(commentIndex);
+            if (commentIndexNum > task.comments.length - 1 || commentIndexNum < 0) {
+                console.log("Неверный ввод");
+            } else {
+                task.removeComment(commentIndexNum);
+                console.log("Комментарий успешно удален.");
+            }
+        }
+    }
+}
+
+function removeCommentFromSubtaskPrompt(projects, currentUser) {
+    const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
+    checkNull(projectIndex);
+    const projectIndexNum = parseInt(projectIndex);
+    if (projectIndexNum > projects.length - 1 || projectIndexNum < 0) {
+        console.log("Неверный ввод");
         return;
     }
 
-    const commentIndex = prompt(
-        "Введите индекс комментария (от 0 до " +
-        (project.comments.length - 1) +
-        "):"
-    );
+    const project = projects[projectIndexNum];
+    if (project.tasks.length === 0) {
+        console.log("В выбранном проекте нет задач.");
+        return;
+    }
+
+    console.log(`Задачи проекта "${project.name}":`);
+    project.tasks.forEach((task, taskIndex) => {
+        console.log(`Задача ${taskIndex}: ${task.title}`);
+        if (task.subtasks.length === 0) {
+            console.log("  Нет подзадач");
+        } else {
+            task.subtasks.forEach((subtask, subtaskIndex) => {
+                console.log(`  Подзадача ${subtaskIndex}: ${subtask.title}`);
+                if (subtask.comments.length === 0) {
+                    console.log("    Нет комментариев");
+                } else {
+                    subtask.comments.forEach((comment, commentIndex) => {
+                        console.log(`    Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author})`);
+                    });
+                }
+            });
+        }
+    });
+
+    const taskIndex = prompt("Введите индекс задачи (от 0 до " + (project.tasks.length - 1) + "):");
+    checkNull(taskIndex);
+    const taskIndexNum = parseInt(taskIndex);
+    if (taskIndexNum > project.tasks.length - 1 || taskIndexNum < 0) {
+        console.log("Неверный ввод");
+        return;
+    }
+
+    const task = project.tasks[taskIndexNum];
+    if (task.subtasks.length === 0) {
+        console.log("В выбранной задаче нет подзадач.");
+        return;
+    }
+
+    const subtaskIndex = prompt("Введите индекс подзадачи (от 0 до " + (task.subtasks.length - 1) + "):");
+    checkNull(subtaskIndex);
+    const subtaskIndexNum = parseInt(subtaskIndex);
+    if (subtaskIndexNum > task.subtasks.length - 1 || subtaskIndexNum < 0) {
+        console.log("Неверный ввод");
+        return;
+    }
+
+    const subtask = task.subtasks[subtaskIndexNum];
+    if (subtask.comments.length === 0) {
+        console.log("В выбранной подзадаче нет комментариев.");
+        return;
+    }
+
+    console.log(`Комментарии подзадачи "${subtask.title}":`);
+    subtask.comments.forEach((comment, commentIndex) => {
+        console.log(`Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author})`);
+    });
+
+    const commentIndex = prompt("Введите индекс комментария (от 0 до " + (subtask.comments.length - 1) + "):");
     checkNull(commentIndex);
     const commentIndexNum = parseInt(commentIndex);
-    if (isNaN(commentIndexNum) || commentIndexNum < 0 || commentIndexNum >= project.comments.length) {
-        console.log("Неверный индекс комментария");
+    if (commentIndexNum > subtask.comments.length - 1 || commentIndexNum < 0) {
+        console.log("Неверный ввод");
         return;
     }
 
-    project.removeComment(commentIndexNum);
-    console.log("Комментарий успешно удален");
+    subtask.comments.splice(commentIndexNum, 1);
+    console.log("Комментарий успешно удален.");
 }
 
 
@@ -507,10 +667,10 @@ export function displayUserTasksAndProjectsInfo() {
                 console.log(`Время выполнения: ${task.deadline}`);
                 console.log(`Приоритет: ${task.priority}`)
                 console.log(`Комментарии к задаче "${task.title}":`);
-                if (project.comments.length === 0) {
+                if (task.comments.length === 0) {
                     console.log("  Нет комментариев");
                 } else {
-                    project.comments.forEach((comment, commentIndex) => {
+                    task.comments.forEach((comment, commentIndex) => {
                         console.log(`   Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
                     });
                 }
@@ -525,10 +685,10 @@ export function displayUserTasksAndProjectsInfo() {
                         console.log(`   Описание: ${subtask.description}`);
                         console.log(`   Тип подзадачи: ${subtask.type}`)
                         console.log(`   Комментарии к подзадаче "${subtask.title}":`);
-                        if (project.comments.length === 0) {
+                        if (subtask.comments.length === 0) {
                             console.log("   Нет комментариев");
                         } else {
-                            project.comments.forEach((comment, commentIndex) => {
+                            subtask.comments.forEach((comment, commentIndex) => {
                                 console.log(`      Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
                             });
                         }
@@ -547,7 +707,7 @@ export function displayUserTasksAndProjectsInfo() {
         }
         else {
             const project = currentUser.projects[projectIndex];
-            console.log(`  Комментарии к проекту: ${project.comment}`);
+            console.log(`  Комментарии к проекту: ${project.name}`);
             if (project.comments.length === 0) {
                 console.log("  Нет комментариев");
             } else {
@@ -580,7 +740,15 @@ export function changeCurrentUserData() {
     if (choice === "1") {
         console.log(`Проекты пользователя ${currentUser.name}:`);
         currentUser.projects.forEach((project, projectIndex) => {
-            console.log(`Проект ${projectIndex}: ${project.name}, comment - ${project.comment}`);
+            console.log(`Проект ${projectIndex}: ${project.name}`);
+            console.log(`Комментарии к проекту: ${project.name}`);
+            if (project.comments.length === 0) {
+                console.log("  Нет комментариев");
+            } else {
+                project.comments.forEach((comment, commentIndex) => {
+                    console.log(`  Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
+                });
+            }
             if (project.tasks.length === 0) {
                 console.log("  Нет задач");
             } else {
@@ -592,12 +760,26 @@ export function changeCurrentUserData() {
         });
         const projectIndex = prompt("Введите индекс проекта, который вы хотите изменить:");
         checkNull(projectIndex);
-        const selectedProject = currentUser.projects[projectIndex];
-        if (selectedProject) {
-            const newComment = prompt("Введите новый комментарий к проекту:");
-            checkNull(newComment);
-            selectedProject.comment = newComment;
-            console.log(`Комментарий проекта "${selectedProject.name}" успешно изменен.`);
+        const projectIndexNum = parseInt(projectIndex);
+        const project = currentUser.projects[projectIndexNum];
+        if (projectIndexNum >= 0 && projectIndexNum < currentUser.projects.length) {
+            const selectedProject = currentUser.projects[projectIndexNum];
+            const commentIndex = prompt("Введите индекс комментария (от 0 до " + (project.comments.length - 1) + "):");
+            checkNull(commentIndex);
+            const commentIndexNum = parseInt(commentIndex);
+            if (commentIndexNum > project.comments.length - 1 || commentIndexNum < 0) {
+                console.log("Неверный ввод")
+            }
+            else {
+                const commentText = prompt("Введите комментарий к проекту:");
+                checkNull(commentText);
+                if (commentText) {
+                    project.comments[commentIndexNum].text = commentText;
+                    console.log(`Комментарий проекта "${selectedProject.name}" успешно изменен.`);
+                } else {
+                    console.log("Вы не ввели комментарий.");
+                }
+            }
         } else {
             console.log("Неверный индекс проекта.");
         }
@@ -611,6 +793,13 @@ export function changeCurrentUserData() {
                 console.log(`  Тип задачи: ${task.type}`)
                 console.log(`  Время выполнения: ${task.deadline}`);
                 console.log(`  Приоритет: ${task.priority}`)
+                if (task.comments.length === 0) {
+                    console.log("  Нет комментариев");
+                } else {
+                    task.comments.forEach((comment, commentIndex) => {
+                        console.log(`   Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
+                    });
+                }
                 const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
                 console.log(`  Статус: ${status}`)
                 if (task.subtasks.length === 0) {
@@ -625,13 +814,15 @@ export function changeCurrentUserData() {
 
         const projectIndex = prompt("Введите индекс проекта:");
         checkNull(projectIndex);
+        const projectIndexNum = parseInt(projectIndex);
         const selectedProject = currentUser.projects[projectIndex];
-
+        const project = currentUser.projects[projectIndexNum];
         if (selectedProject) {
             const taskIndex = prompt("Введите индекс задачи, которую вы хотите изменить:");
             checkNull(taskIndex);
             const selectedTask = selectedProject.tasks[taskIndex];
-
+            const taskIndexNum = parseInt(taskIndex);
+            const task = project.tasks[taskIndexNum];
             if (selectedTask) {
                 const newTitleChoise = prompt("Хотите введите новое имя задачи?(y/n)");
                 checkNull(newTitleChoise);
@@ -640,8 +831,28 @@ export function changeCurrentUserData() {
                     checkNull(newTitle);
                     selectedTask.title = newTitle;
                 }
+                const newCommentChoise = prompt("Хотите ввести новый комментарий задачи?(y/n)");
+                checkNull(newCommentChoise);
+                if (newCommentChoise === "y") {
+                    const commentIndex = prompt("Введите индекс комментария (от 0 до " + (task.comments.length - 1) + "):");
+                    checkNull(commentIndex);
+                    const commentIndexNum = parseInt(commentIndex);
+                    if (commentIndexNum > task.comments.length - 1 || commentIndexNum < 0) {
+                        console.log("Неверный ввод")
+                    }
+                    else {
+                        const commentText = prompt("Введите комментарий к проекту:");
+                        checkNull(commentText);
+                        if (commentText) {
+                            task.comments[commentIndexNum].text = commentText;
+                            console.log(`Комментарий проекта "${selectedTask.title}" успешно изменен.`);
+                        } else {
+                            console.log("Вы не ввели комментарий.");
+                        }
+                    }
+                }
                 const newDescriptionChoise = prompt("Хотите введите новое описание задачи?(y/n)");
-                checkNull(newDeadlineChoise);
+                checkNull(newDescriptionChoise);
                 if (newDescriptionChoise === "y") {
                     const newDescription = prompt("Введите новое описание задачи:")
                     checkNull(newDescription);
@@ -729,21 +940,35 @@ export function changeCurrentUserData() {
                     console.log(`       Дата: ${subtask.dueDate}`);
                     console.log(`       Описание: ${subtask.description}`);
                     console.log(`       Тип подзадачи: ${subtask.type}`)
+                    console.log(`       Комментарии к подзадаче "${subtask.title}":`);
+                    if (subtask.comments.length === 0) {
+                        console.log("       Нет комментариев");
+                    } else {
+                        subtask.comments.forEach((comment, commentIndex) => {
+                            console.log(`         Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
+                        });
+                    }
                     console.log(`       Готовность: ${subtask.completed ? 'Завершено' : 'Ожидает выполнения'}`);
                 });
             });
         });
         const projectIndex = prompt("Введите индекс проекта:");
         checkNull(projectIndex);
+        const projectIndexNum = parseInt(projectIndex);
+        const project = currentUser.projects[projectIndexNum];
         const selectedProject = currentUser.projects[projectIndex];
         if (selectedProject) {
             const taskIndex = prompt("Введите индекс задачи, которую вы хотите изменить:");
             checkNull(taskIndex);
             const selectedTask = selectedProject.tasks[taskIndex];
+            const taskIndexNum = parseInt(taskIndex);
+            const task = project.tasks[taskIndexNum];
             if (selectedTask) {
                 const subtaskIndex = prompt("Введите индекс подзадачи, которую вы хотите изменить:");
                 checkNull(subtaskIndex);
                 const selectedSubtask = selectedTask.subtasks[subtaskIndex];
+                const subtaskIndexNum = parseInt(subtaskIndex);
+                const subtask = task.subtasks[subtaskIndexNum];
                 if (selectedSubtask) {
                     const newTitleChoise = prompt("Хотите введите новое имя подзадачи?(y/n)");
                     checkNull(newTitleChoise);
@@ -752,8 +977,28 @@ export function changeCurrentUserData() {
                         checkNull(newTitle);
                         selectedSubtask.title = newTitle;
                     }
+                    const newCommentChoise = prompt("Хотите ввести новый комментарий задачи?(y/n)");
+                    checkNull(newCommentChoise);
+                    if (newCommentChoise === "y") {
+                        const commentIndex = prompt("Введите индекс комментария (от 0 до " + (subtask.comments.length - 1) + "):");
+                        checkNull(commentIndex);
+                        const commentIndexNum = parseInt(commentIndex);
+                        if (commentIndexNum > subtask.comments.length - 1 || commentIndexNum < 0) {
+                            console.log("Неверный ввод")
+                        }
+                        else {
+                            const commentText = prompt("Введите комментарий к проекту:");
+                            checkNull(commentText);
+                            if (commentText) {
+                                subtask.comments[commentIndexNum].text = commentText;
+                                console.log(`Комментарий проекта "${selectedSubtask.title}" успешно изменен.`);
+                            } else {
+                                console.log("Вы не ввели комментарий.");
+                            }
+                        }
+                    }
                     const newDescriptionChoise = prompt("Хотите введите новое описание подзадачи?(y/n)");
-                    checkNull(newDeadlineChoise);
+                    checkNull(newDescriptionChoise);
                     if (newDescriptionChoise === "y") {
                         const newDescription = prompt("Введите новое описание подзадачи:")
                         checkNull(newDescription);

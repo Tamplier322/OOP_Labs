@@ -2,7 +2,7 @@ import {
     registerUser, checkUser, checkUserForProjects, addTaskToCurrentUser,
     createTask, changeTaskStatus, changeCurrentUserData,
     displayUserTasksAndProjectsInfo, deleteItem, addSubtaskToExistedTask,
-    setTaskPriority, addCommentToProject, removeProjectComment
+    setTaskPriority, addCommentToProject, removeCommentPrompt
 } from './funcs.js'
 
 export const choose_text = 'What do u want to do?\n' +
@@ -56,7 +56,7 @@ export function mainMenu() {
             addCommentToProject();
             break;
         case "10":
-            removeProjectComment();
+            removeCommentPrompt();
             break;
         case "11":
             addSubtaskToExistedTask();

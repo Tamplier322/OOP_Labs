@@ -103,7 +103,6 @@ export class Comment {
         this.text = text;
         this.dateAdded = dateAdded;
     }
-
 }
 
 
@@ -118,6 +117,10 @@ export class Project {
         this.comments.push(comment);
     }
 
+    removeComment(commentIndex) {
+        this.comments.splice(commentIndex, 1);
+    }
+
     addTask(task) {
         this.tasks.push(task);
     }
@@ -126,6 +129,12 @@ export class Project {
         const index = this.tasks.indexOf(task);
         if (index !== -1) {
             this.tasks.splice(index, 1);
+        }
+    }
+
+    removeComment(commentIndex) {
+        if (commentIndex >= 0 && commentIndex < this.comments.length) {
+            this.comments.splice(commentIndex, 1);
         }
     }
 }
