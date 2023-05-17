@@ -1,3 +1,4 @@
+import { checkNull } from "./funcs.js";
 export class Task {
     constructor(title, description, deadline, priority, type) {
         this.title = title;
@@ -7,6 +8,7 @@ export class Task {
         this.completed = false;
         this.priority = priority;
         this.subtasks = [];
+        this.comments = [];
     }
 
     complete() {
@@ -23,21 +25,31 @@ export class Task {
         let addSubtask = confirm("Хотите ли добавить подзадачу?");
         while (addSubtask) {
             const subtaskTitle = prompt(`Введите название подзадачи:`);
-            const setSubtaskTime = confirm("Хотите ли установить время для подзадачи?");
-            const setSubtaskDescription = confirm("Хотите ли добавить описание для подзадачи?");
+            checkNull(subtaskTitle)
             const subtask = new Subtask(subtaskTitle, '', '', '', '', [], '', '');
+            const setSubtaskTime = confirm("Хотите ли установить время для подзадачи?");
+            checkNull(setSubtaskTime)
             if (setSubtaskTime) {
                 const subtaskTime = prompt("Введите время для подзадачи:");
+                checkNull(subtaskTime)
                 subtask.dueDate = subtaskTime;
             }
+            else {
+                subtask.dueDate = this.deadline;
+            }
+            const setSubtaskDescription = confirm("Хотите ли добавить описание для подзадачи?");
+            checkNull(setSubtaskDescription)
             if (setSubtaskDescription) {
                 const subtaskDescription = prompt("Введите описание для подзадачи:");
+                checkNull(subtaskDescription)
                 subtask.description = subtaskDescription;
+            }
+            else {
+                subtask.description = this.description;
             }
             subtask.type = this.type;
             this.subtasks.push(subtask);
             addSubtask = confirm("Хотите ли добавить еще подзадачу?");
-
         }
         console.log(`Подзадачи для задачи "${this.title}" успешно добавлены!`);
     }
@@ -50,6 +62,14 @@ export class Task {
         const removedSubtask = this.subtasks.splice(subtaskIndex, 1)[0];
         console.log(`Подзадача "${removedSubtask.title}" успешно удалена из задачи "${this.title}"`);
     }
+
+    addComment(comment) {
+        this.comments.push(comment);
+    }
+
+    removeComment(commentIndex) {
+        this.comments.splice(commentIndex, 1);
+    }
 }
 
 
@@ -60,29 +80,42 @@ export class Subtask extends Task {
         this.description = description;
         this.dueDate = dueDate;
         this.type = type;
+        this.comments = [];
     }
 
     complete() {
         this.completed = true;
     }
 
+
+    addComment(comment) {
+        this.comments.push(comment);
+    }
+
+    removeComment(commentIndex) {
+        this.comments.splice(commentIndex, 1);
+    }
+}
+
+export class Comment {
+    constructor(author, text, dateAdded) {
+        this.author = author;
+        this.text = text;
+        this.dateAdded = dateAdded;
+    }
+
 }
 
 
 export class Project {
-    constructor(name, comment = "No comment") {
+    constructor(name) {
         this.name = name;
-        this.comment = comment;
         this.tasks = [];
         this.comments = []
     }
 
     addComment(comment) {
-        this.comments.push(comment)
-    }
-
-    removeComment(commentIndex) {
-        this.comments.splice(commentIndex, 1);
+        this.comments.push(comment);
     }
 
     addTask(task) {

@@ -1,7 +1,7 @@
 import {
     registerUser, checkUser, checkUserForProjects, addTaskToCurrentUser,
-    createTask, createProject, changeTaskStatus, changeCurrentUserData,
-    displayUserTasksAndProjectsInfo, deleteItem,
+    createTask, changeTaskStatus, changeCurrentUserData,
+    displayUserTasksAndProjectsInfo, deleteItem, addSubtaskToExistedTask,
     setTaskPriority, addCommentToProject, removeProjectComment
 } from './funcs.js'
 
@@ -16,6 +16,7 @@ export const choose_text = 'What do u want to do?\n' +
     '8. Sign in.\n' +
     '9. Add comment to project.\n' +
     '10. Delete comment.\n' +
+    '11. Add subtask to existed task\n' +
     'exit. Exit'
 export let choose = "0"
 
@@ -23,7 +24,7 @@ export let choose = "0"
 
 export function mainMenu() {
     choose = prompt(choose_text)
-    if (choose == "exit") {
+    if (choose == "111") {
         return;
     }
     switch (choose) {
@@ -56,6 +57,9 @@ export function mainMenu() {
             break;
         case "10":
             removeProjectComment();
+            break;
+        case "11":
+            addSubtaskToExistedTask();
             break;
     }
     mainMenu()
