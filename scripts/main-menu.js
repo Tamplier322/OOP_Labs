@@ -1,23 +1,32 @@
 import {
     registerUser, checkUser, checkUserForProjects, addTaskToCurrentUser,
-    createTask, changeTaskStatus, changeCurrentUserData,
+    createTask, changeTaskStatus, changeCurrentUserData, changeUserData,
     displayUserTasksAndProjectsInfo, deleteItem, addSubtaskToExistedTask,
-    setTaskPriority, addCommentToProject, removeCommentPrompt
+    setTaskPriority, addCommentToProject, removeCommentPrompt, viewAllUsers,
+    createGroup, deleteGroup, displayAllGroups, addUserToGroup, removeCurrentUserFromGroup,
+    createProject
 } from './funcs.js'
 
-export const choose_text = 'What do u want to do?\n' +
-    '1. Add task to choosed user.\n' +
-    '2. Change user data.\n' +
-    '3. Create new project.\n' +
-    '4. Change task or subtask status.\n' +
-    '5. Display users tasks anf projects info.\n' +
-    '6. Delete project, task or subtask.\n' +
-    '7. Set tasks or subtasks priority.\n' +
-    '8. Sign in.\n' +
-    '9. Add comment to project.\n' +
-    '10. Delete comment.\n' +
-    '11. Add subtask to existed task\n' +
-    'exit. Exit'
+export const choose_text = 'Что хотите сделать?\n' +
+    '1. Добавить задание пользователя.\n' +
+    '2. Изменить данные задач, подзадач или проектов.\n' +
+    '3. Создать новый проект.\n' +
+    '4. Изменить статус готовности задачи или подзадачи.\n' +
+    '5. Вывести информацию о задачах или проектах.\n' +
+    '6. Удалить проект, задачу или подзадачу.\n' +
+    '7. Установить приоритет задачи или подзадачи.\n' +
+    '8. Регистраци.\n' +
+    '9. Добавить комментарий.\n' +
+    '10. Удалить комментарий.\n' +
+    '11. Добавить подзадачу к существующей задаче.\n' +
+    '12. Вывести всех зарегистрированных пользователей.\n' +
+    '13. Изменить данные пользователя.\n' +
+    '14. Создать группу.\n' +
+    '15. Удалить группу.\n' +
+    '16. Вывести все группы.\n' +
+    '17. Добавить пользователя в группу.\n' +
+    '18. Удалить пользователя из группы.\n' +
+    '111. Exit'
 export let choose = "0"
 
 
@@ -61,6 +70,28 @@ export function mainMenu() {
         case "11":
             addSubtaskToExistedTask();
             break;
+        case "12":
+            viewAllUsers();
+            break;
+        case "13":
+            changeUserData();
+            break;
+        case "14":
+            createGroup();
+            break;
+        case "15":
+            deleteGroup();
+            break;
+        case "16":
+            displayAllGroups();
+            break;
+        case "17":
+            addUserToGroup();
+            break;
+        case "18":
+            removeCurrentUserFromGroup();
+            break;
+
     }
     mainMenu()
 }

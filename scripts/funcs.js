@@ -6,6 +6,7 @@ import { users } from './classes.js'
 import { mainMenu } from './main-menu.js'
 import { Priority } from './classes.js'
 import { Comment } from './classes.js'
+import { Group } from './classes.js'
 
 //Функция поверки на null
 export function checkNull(value) {
@@ -18,38 +19,76 @@ export function checkNull(value) {
 
 // Функция регистрации пользователя
 export function registerUser() {
-    const name = prompt("Введите имя пользователя:");
-    checkNull(name)
-    const user = new User(name);
-    users.push(user);
-    console.log(`Пользователь ${name} успешно зарегистрирован!`);
+    const login = prompt("Введите ваш логин:");
+    checkNull(login);
+    if (checkUserForRegistration(login)) {
+        mainMenu()
+    }
+    else {
+        const name = prompt("Введите имя:");
+        checkNull(name);
 
+        const surname = prompt("Введите вашу фамилию:");
+        checkNull(surname);
+
+        const email = prompt("Введите ваш email:");
+        checkNull(email);
+
+        const password = prompt("Введите пароль:");
+        checkNull(password);
+
+        const user = new User(name, surname, email, login, password);
+        console.log("Регистрация успешно завершена!");
+        console.log("Ваши данные:");
+        console.log(user);
+
+        users.push(user);
+
+        return user;
+    }
 }
 
 
 // Функция проверки существования пользователя при регистрации
 export function checkUser() {
-    const name = prompt("Введите имя пользователя:");
-    checkNull(name)
-    let user = users.find((user) => user.name === name);
+    const login = prompt("Введите логин пользователя:");
+    checkNull(login)
+    let user = users.find((user) => user.login === login);
 
     if (user) {
-        console.log(`Пользователь ${name} уже зарегистрирован!`);
-        return user;
+        console.log(`Пользователь ${user.name} уже зарегистрирован!`);
     } else {
-        user = new User(name);
-        users.push(user);
-        console.log(`Пользователь ${name} успешно зарегистрирован!`);
-        return user;
+        let registerUserChoice = confirm("Хотите зарегистрировать нового пользователя?")
+        if (registerUserChoice) {
+            user = registerUser();
+        }
+        else {
+            mainMenu();
+        }
+    }
+
+    return user;
+}
+
+
+// Функция проверки существования пользователя
+export function checkUserForRegistration(login) {
+    let user = users.find((user) => user.login === login);
+    if (user) {
+        console.log("Такой пользователь уже существует");
+        return true; // User exists
+    } else {
+        console.log(users)
+        return false; // User does not exist
     }
 }
 
 
 // Функция проверки существования пользователя при добавлении проектов и задач
 export function checkUserForProjects() {
-    const name = prompt("Введите имя пользователя:");
-    checkNull(name)
-    let user = users.find((user) => user.name === name);
+    const login = prompt("Введите логин пользователя:");
+    checkNull(login)
+    let user = users.find((user) => user.login === login);
     if (user) {
         return user;
     } else {
@@ -79,8 +118,14 @@ export function addTaskToCurrentUser() {
     if (currentUser.projects.length > 0) {
         const projectIndex = prompt("Введите индекс проекта пользователя (от 0 до " + (currentUser.projects.length - 1) + "):");
         checkNull(projectIndex);
-        project = currentUser.projects[projectIndex];
-        createTask(currentUser, project);
+        const projectIndexNum = parseInt(projectIndex)
+        if (projectIndexNum > currentUser.projects.length - 1 || projectIndexNum < 0) {
+            console.log("Неверный ввод")
+        }
+        else {
+            project = currentUser.projects[projectIndex];
+            createTask(currentUser, project);
+        }
     } else {
         const projectName = prompt("Введите название проекта:");
         project = new Project(projectName);
@@ -154,6 +199,18 @@ export function createTask(currentUser, project) {
 }
 
 
+// Функция создания проекта
+export function createProject() {
+    const currentUser = checkUserForProjects();
+    const projectName = prompt("Введите название проекта:");
+    checkNull(projectName)
+    const project = new Project(projectName);
+    currentUser.projects.push(project);
+    console.log(`Проект "${project.name}" успешно создан для пользователя "${currentUser.name}"!`);
+
+}
+
+
 // Функция добавления комментария
 export function addCommentToProject() {
     const currentUser = checkUserForProjects();
@@ -200,6 +257,7 @@ export function addCommentToProject() {
     }
 }
 
+
 // Функция добавления комментария к проекту
 function addCommentToProjectPrompt(projects, currentUser) {
     const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
@@ -221,6 +279,7 @@ function addCommentToProjectPrompt(projects, currentUser) {
         }
     }
 }
+
 
 // Функция добавления комментария к задаче
 function addCommentToTaskPrompt(projects, currentUser) {
@@ -257,6 +316,7 @@ function addCommentToTaskPrompt(projects, currentUser) {
         }
     }
 }
+
 
 // Функция добавления комментария к подзадаче
 function addCommentToSubtaskPrompt(projects, currentUser) {
@@ -354,7 +414,8 @@ export function removeCommentPrompt() {
     }
 }
 
-//
+
+// Функция удаления комментария с проекта
 function removeCommentFromProjectPrompt(projects, currentUser) {
     const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
     checkNull(projectIndex);
@@ -383,6 +444,8 @@ function removeCommentFromProjectPrompt(projects, currentUser) {
     }
 }
 
+
+// Функция удаления комментария с задачи
 function removeCommentFromTaskPrompt(projects, currentUser) {
     const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
     checkNull(projectIndex);
@@ -435,6 +498,8 @@ function removeCommentFromTaskPrompt(projects, currentUser) {
     }
 }
 
+
+// Функция удаления комментария с подзадачи
 function removeCommentFromSubtaskPrompt(projects, currentUser) {
     const projectIndex = prompt("Введите индекс проекта (от 0 до " + (projects.length - 1) + "):");
     checkNull(projectIndex);
@@ -676,6 +741,7 @@ export function displayUserTasksAndProjectsInfo() {
                 }
                 const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
                 console.log(`Статус: ${status}`)
+
                 if (task.subtasks.length === 0) {
                     console.log("Нет подзадач");
                 } else {
@@ -685,14 +751,19 @@ export function displayUserTasksAndProjectsInfo() {
                         console.log(`   Описание: ${subtask.description}`);
                         console.log(`   Тип подзадачи: ${subtask.type}`)
                         console.log(`   Комментарии к подзадаче "${subtask.title}":`);
-                        if (subtask.comments.length === 0) {
+                        if (subtask.comments === undefined || subtask.comments.length === 0) {
                             console.log("   Нет комментариев");
                         } else {
-                            subtask.comments.forEach((comment, commentIndex) => {
-                                console.log(`      Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
-                            });
+                            if (subtask.comments.length === 0) {
+                                console.log("   Нет комментариев");
+                            } else {
+                                subtask.comments.forEach((comment, commentIndex) => {
+                                    console.log(`      Комментарий ${commentIndex}: ${comment.text} (оставил - ${comment.author}, дата - ${comment.dateAdded})`);
+                                });
+                            }
+                            console.log(`   Готовность: ${subtask.completed ? 'Завершено' : 'Ожидает выполнения'}`);
                         }
-                        console.log(`   Готовность: ${subtask.completed ? 'Завершено' : 'Ожидает выполнения'}`);
+
                     });
                 }
             }
@@ -763,21 +834,26 @@ export function changeCurrentUserData() {
         const projectIndexNum = parseInt(projectIndex);
         const project = currentUser.projects[projectIndexNum];
         if (projectIndexNum >= 0 && projectIndexNum < currentUser.projects.length) {
-            const selectedProject = currentUser.projects[projectIndexNum];
-            const commentIndex = prompt("Введите индекс комментария (от 0 до " + (project.comments.length - 1) + "):");
-            checkNull(commentIndex);
-            const commentIndexNum = parseInt(commentIndex);
-            if (commentIndexNum > project.comments.length - 1 || commentIndexNum < 0) {
-                console.log("Неверный ввод")
+            if (project.comments.length === 0) {
+                console.log(" В данном проекте нет комментариев");
             }
             else {
-                const commentText = prompt("Введите комментарий к проекту:");
-                checkNull(commentText);
-                if (commentText) {
-                    project.comments[commentIndexNum].text = commentText;
-                    console.log(`Комментарий проекта "${selectedProject.name}" успешно изменен.`);
-                } else {
-                    console.log("Вы не ввели комментарий.");
+                const selectedProject = currentUser.projects[projectIndexNum];
+                const commentIndex = prompt("Введите индекс комментария (от 0 до " + (project.comments.length - 1) + "):");
+                checkNull(commentIndex);
+                const commentIndexNum = parseInt(commentIndex);
+                if (commentIndexNum > project.comments.length - 1 || commentIndexNum < 0) {
+                    console.log("Неверный ввод")
+                }
+                else {
+                    const commentText = prompt("Введите комментарий к проекту:");
+                    checkNull(commentText);
+                    if (commentText) {
+                        project.comments[commentIndexNum].text = commentText;
+                        console.log(`Комментарий проекта "${selectedProject.name}" успешно изменен.`);
+                    } else {
+                        console.log("Вы не ввели комментарий.");
+                    }
                 }
             }
         } else {
@@ -802,13 +878,6 @@ export function changeCurrentUserData() {
                 }
                 const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
                 console.log(`  Статус: ${status}`)
-                if (task.subtasks.length === 0) {
-                    console.log("Нет подзадач");
-                } else {
-                    task.subtasks.forEach((subtask, subtaskIndex) => {
-                        console.log(`    Подзадача ${subtaskIndex}: ${subtask.title}`);
-                    });
-                }
             });
         });
 
@@ -834,20 +903,24 @@ export function changeCurrentUserData() {
                 const newCommentChoise = prompt("Хотите ввести новый комментарий задачи?(y/n)");
                 checkNull(newCommentChoise);
                 if (newCommentChoise === "y") {
-                    const commentIndex = prompt("Введите индекс комментария (от 0 до " + (task.comments.length - 1) + "):");
-                    checkNull(commentIndex);
-                    const commentIndexNum = parseInt(commentIndex);
-                    if (commentIndexNum > task.comments.length - 1 || commentIndexNum < 0) {
-                        console.log("Неверный ввод")
-                    }
-                    else {
-                        const commentText = prompt("Введите комментарий к проекту:");
-                        checkNull(commentText);
-                        if (commentText) {
-                            task.comments[commentIndexNum].text = commentText;
-                            console.log(`Комментарий проекта "${selectedTask.title}" успешно изменен.`);
-                        } else {
-                            console.log("Вы не ввели комментарий.");
+                    if (task.comments.length === 0) {
+                        console.log(" У текущей задачи нет комментариев, добавьте его в поле выбора");
+                    } else {
+                        const commentIndex = prompt("Введите индекс комментария (от 0 до " + (task.comments.length - 1) + "):");
+                        checkNull(commentIndex);
+                        const commentIndexNum = parseInt(commentIndex);
+                        if (commentIndexNum > task.comments.length - 1 || commentIndexNum < 0) {
+                            console.log("Неверный ввод")
+                        }
+                        else {
+                            const commentText = prompt("Введите комментарий к проекту:");
+                            checkNull(commentText);
+                            if (commentText) {
+                                task.comments[commentIndexNum].text = commentText;
+                                console.log(`Комментарий проекта "${selectedTask.title}" успешно изменен.`);
+                            } else {
+                                console.log("Вы не ввели комментарий.");
+                            }
                         }
                     }
                 }
@@ -980,20 +1053,24 @@ export function changeCurrentUserData() {
                     const newCommentChoise = prompt("Хотите ввести новый комментарий задачи?(y/n)");
                     checkNull(newCommentChoise);
                     if (newCommentChoise === "y") {
-                        const commentIndex = prompt("Введите индекс комментария (от 0 до " + (subtask.comments.length - 1) + "):");
-                        checkNull(commentIndex);
-                        const commentIndexNum = parseInt(commentIndex);
-                        if (commentIndexNum > subtask.comments.length - 1 || commentIndexNum < 0) {
-                            console.log("Неверный ввод")
-                        }
-                        else {
-                            const commentText = prompt("Введите комментарий к проекту:");
-                            checkNull(commentText);
-                            if (commentText) {
-                                subtask.comments[commentIndexNum].text = commentText;
-                                console.log(`Комментарий проекта "${selectedSubtask.title}" успешно изменен.`);
-                            } else {
-                                console.log("Вы не ввели комментарий.");
+                        if (subtask.comments.length === 0) {
+                            console.log("  У текущей подзадачи нет комментариев, сначала добавьте комментарий в поле выбора");
+                        } else {
+                            const commentIndex = prompt("Введите индекс комментария (от 0 до " + (subtask.comments.length - 1) + "):");
+                            checkNull(commentIndex);
+                            const commentIndexNum = parseInt(commentIndex);
+                            if (commentIndexNum > subtask.comments.length - 1 || commentIndexNum < 0) {
+                                console.log("Неверный ввод")
+                            }
+                            else {
+                                const commentText = prompt("Введите комментарий к проекту:");
+                                checkNull(commentText);
+                                if (commentText) {
+                                    subtask.comments[commentIndexNum].text = commentText;
+                                    console.log(`Комментарий проекта "${selectedSubtask.title}" успешно изменен.`);
+                                } else {
+                                    console.log("Вы не ввели комментарий.");
+                                }
                             }
                         }
                     }
@@ -1250,6 +1327,11 @@ export function setTaskPriority() {
 export function addSubtaskToExistedTask() {
     const currentUser = checkUserForProjects();
 
+    if (currentUser.projects.length === 0) {
+        console.log("У текущего пользователя нет проектов.");
+        return;
+    }
+
     console.log("Добавление подзадачи к задаче:");
     currentUser.projects.forEach((project, projectIndex) => {
         console.log(`Проект ${projectIndex}: ${project.name}`);
@@ -1264,6 +1346,10 @@ export function addSubtaskToExistedTask() {
     const project = currentUser.projects[projectIndex];
 
     if (selectedProject) {
+        if (project.tasks.length === 0) {
+            console.log("В выбранном проекте нет задач.");
+            return;
+        }
         const taskIndex = prompt("Введите индекс задачи, к которой вы хотите добавить подзадачу:");
         checkNull(taskIndex);
         const selectedTask = selectedProject.tasks[taskIndex];
@@ -1290,5 +1376,230 @@ export function addSubtaskToExistedTask() {
         }
     } else {
         console.log("Неверный индекс проекта.");
+    }
+}
+
+
+// Функция для просмотра всех зарегестрированных пользователей
+export function viewAllUsers() {
+    console.log("Список зарегистрированных пользователей:");
+    users.forEach((user, index) => {
+        console.log(`Пользователь ${index + 1}:`);
+        console.log(`Имя: ${user.name}`);
+        console.log(`Фамилия: ${user.surname}`);
+        console.log(`Email: ${user.email}`);
+        console.log(`Логин: ${user.login}`);
+        console.log(`Пароль: ${user.password}`);
+        console.log("-------------------------------");
+    });
+}
+
+
+// Функция для проверки наличия пользователя с указанным логином и паролем
+function findUserByLoginAndPassword(login, password) {
+    return users.find(user => user.login === login && user.password === password);
+}
+
+
+// Функция для проверки существования логина
+function isLoginExists(login) {
+    return users.some(user => user.login === login);
+}
+
+
+// Функция для изменения данных пользователей
+export function changeUserData() {
+    const login = prompt("Введите ваш логин:");
+    const password = prompt("Введите ваш пароль:");
+
+    // Проверка наличия пользователя с указанным логином и паролем
+    const currentUser = findUserByLoginAndPassword(login, password);
+    if (!currentUser) {
+        console.log("Неверный логин или пароль.");
+        return;
+    }
+
+    const choice = prompt("Выберите, что вы хотите изменить:\n1. Имя\n2. Фамилию\n3. Email\n4. Логин\n5. Пароль");
+    checkNull(choice);
+
+    switch (choice) {
+        case "1":
+            const newName = prompt("Введите новое имя:");
+            checkNull(newName);
+            currentUser.name = newName;
+            console.log("Имя пользователя успешно изменено.");
+            break;
+        case "2":
+            const newSurname = prompt("Введите новую фамилию:");
+            checkNull(newSurname);
+            currentUser.surname = newSurname;
+            console.log("Фамилия пользователя успешно изменена.");
+            break;
+        case "3":
+            const newEmail = prompt("Введите новый email:");
+            checkNull(newEmail);
+            currentUser.email = newEmail;
+            console.log("Email пользователя успешно изменен.");
+            break;
+        case "4":
+            const newLogin = prompt("Введите новый логин:");
+            checkNull(newLogin);
+            if (isLoginExists(newLogin)) {
+                console.log("Такой логин уже существует. Пожалуйста, выберите другой логин.");
+            } else {
+                currentUser.login = newLogin;
+                console.log("Логин пользователя успешно изменен.");
+            }
+            break;
+        case "5":
+            const newPassword = prompt("Введите новый пароль:");
+            checkNull(newPassword);
+            currentUser.password = newPassword;
+            console.log("Пароль пользователя успешно изменен.");
+            break;
+        default:
+            console.log("Неверный выбор.");
+    }
+}
+
+
+// Функция создания группы
+export function createGroup() {
+    const currentUser = checkUserForProjects();
+    Group.createGroup(currentUser);
+}
+
+
+// Функция удаления группы
+export function deleteGroup() {
+    const currentUser = checkUserForProjects();
+
+    const existingGroups = Group.getExistingGroups();
+
+    if (existingGroups.length === 0) {
+        console.log("Нет доступных групп для удаления.");
+        return;
+    }
+
+    console.log("Существующие группы:");
+    for (let i = 0; i < existingGroups.length; i++) {
+        console.log(`${i + 1}. ${existingGroups[i].name}`);
+    }
+
+    const groupIndex = parseInt(prompt("Выберите номер группы для удаления:"));
+
+    if (isNaN(groupIndex) || groupIndex < 1 || groupIndex > existingGroups.length) {
+        console.log("Неверный номер группы.");
+        return;
+    }
+
+    const group = existingGroups[groupIndex - 1];
+
+    const groupIndexInGroups = Group.groups.indexOf(group);
+    if (groupIndexInGroups !== -1) {
+        Group.groups.splice(groupIndexInGroups, 1);
+    }
+    console.log(`Группа "${group.name}" удалена.`);
+}
+
+
+// Функция вывода всех групп на экран
+export function displayAllGroups() {
+    const existingGroups = Group.getExistingGroups();
+
+    if (existingGroups.length === 0) {
+        console.log("Нет доступных групп.");
+        return;
+    }
+
+    console.log("Список групп:");
+
+    for (const group of existingGroups) {
+        console.log(`Группа: ${group.name}`);
+        console.log("Пользователи:");
+
+        for (const member of group.members) {
+            console.log(`- ${member.name}`);
+        }
+
+        console.log("---------------------");
+    }
+}
+
+
+// Функция добавления пользователя в существующую группу
+export function addUserToGroup() {
+    const currentUser = checkUserForProjects();
+
+    const existingGroups = Group.getExistingGroups();
+
+    if (existingGroups.length === 0) {
+        console.log("Нет доступных групп.");
+        return;
+    }
+
+    console.log("Список групп:");
+
+    for (let i = 0; i < existingGroups.length; i++) {
+        console.log(`${i + 1}. ${existingGroups[i].name}`);
+    }
+
+    const groupIndex = parseInt(prompt("Выберите номер группы для добавления:"));
+
+    if (isNaN(groupIndex) || groupIndex < 1 || groupIndex > existingGroups.length) {
+        console.log("Неверный номер группы.");
+        return;
+    }
+
+    const group = existingGroups[groupIndex - 1];
+
+    if (group.hasMember(currentUser)) {
+        console.log(`Пользователь "${currentUser.name}" уже состоит в группе "${group.name}".`);
+        return;
+    }
+
+    group.addMember(currentUser);
+
+    console.log(`Пользователь "${currentUser.name}" добавлен в группу "${group.name}".`);
+}
+
+
+// Функция удаления пользователя из группы
+export function removeCurrentUserFromGroup() {
+    const currentUser = checkUserForProjects();
+
+    const existingGroups = Group.getExistingGroups();
+
+    const userGroups = existingGroups.filter(group => group.hasMember(currentUser));
+
+    if (userGroups.length === 0) {
+        console.log("Вы не состоите ни в одной группе.");
+        return;
+    }
+
+    console.log("Группы, в которых вы состоите:");
+    for (let i = 0; i < userGroups.length; i++) {
+        console.log(`${i + 1}. ${userGroups[i].name}`);
+    }
+
+    const groupIndex = parseInt(prompt("Выберите номер группы для удаления:"));
+
+    if (isNaN(groupIndex) || groupIndex < 1 || groupIndex > userGroups.length) {
+        console.log("Неверный номер группы.");
+        return;
+    }
+
+    const group = userGroups[groupIndex - 1];
+
+    group.removeMember(currentUser);
+
+    if (group.members.length === 0) {
+        const groupIndexInGroups = Group.groups.indexOf(group);
+        if (groupIndexInGroups !== -1) {
+            Group.groups.splice(groupIndexInGroups, 1);
+        }
+        console.log(`Группа "${group.name}" удалена из-за отсутствия пользователей в ней.`);
+    } else {
+        console.log(`Вы покинули группу "${group.name}".`);
     }
 }

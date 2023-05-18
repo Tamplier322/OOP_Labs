@@ -140,13 +140,16 @@ export class Project {
 }
 
 export class User {
-    constructor(name) {
+    constructor(name, surname, email, login, password) {
         this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.login = login;
+        this.password = password;
         this.projects = [];
     }
 
-    createProject(name) {
-        const project = new Project(name);
+    addProject(project) {
         this.projects.push(project);
     }
 
@@ -172,6 +175,52 @@ export class User {
             console.log(`${this.name}: ${task.title}, ${status}, ${task.priority}`);
         });
     }
+}
+
+export class Group {
+    constructor(name) {
+        this.name = name;
+        this.members = [];
+    }
+
+    static groups = [];
+
+    static getExistingGroups() {
+        return Group.groups;
+    }
+
+    addMember(user) {
+        this.members.push(user);
+    }
+
+    removeMember(member) {
+        const index = this.members.indexOf(member);
+        if (index !== -1) {
+            this.members.splice(index, 1);
+            console.log(`Пользователь "${member.name}" удален из группы "${this.name}".`);
+        } else {
+            console.log(`Пользователь "${member.name}" не найден в группе "${this.name}".`);
+        }
+    }
+
+    hasMember(member) {
+        return this.members.includes(member);
+    }
+
+    static createGroup(currentUser) {
+        const groupName = prompt("Введите имя группы:");
+        checkNull(groupName);
+
+        const group = new Group(groupName);
+
+        group.addMember(currentUser);
+
+        Group.groups.push(group);
+
+        console.log(`Группа "${group.name}" успешно создана.`);
+        return group;
+    }
+
 }
 export const users = [];
 
