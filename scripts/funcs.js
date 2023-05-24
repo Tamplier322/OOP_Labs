@@ -24,6 +24,7 @@ export function registerUser() {
     if (checkUserForRegistration(login)) {
         mainMenu()
     }
+
     else {
         const name = prompt("Введите имя:");
         checkNull(name);
@@ -137,6 +138,43 @@ export function addTaskToCurrentUser() {
 }
 
 
+// Функция добавления подзадачи
+export function addSubtasks(task) {
+    let addSubtask = confirm("Хотите ли добавить подзадачу?");
+    while (addSubtask) {
+        const subtaskTitle = prompt(`Введите название подзадачи:`);
+        checkNull(subtaskTitle)
+        const subtask = new Subtask(subtaskTitle, '', '', '', '', [], '', '');
+        const setSubtaskTime = confirm("Хотите ли установить время для подзадачи?");
+        checkNull(setSubtaskTime)
+        if (setSubtaskTime) {
+            const subtaskTime = prompt("Введите время для подзадачи:");
+            checkNull(subtaskTime)
+            subtask.dueDate = subtaskTime;
+        }
+        else {
+            subtask.dueDate = task.deadline;
+        }
+        const setSubtaskDescription = confirm("Хотите ли добавить описание для подзадачи?");
+        checkNull(setSubtaskDescription)
+        if (setSubtaskDescription) {
+            const subtaskDescription = prompt("Введите описание для подзадачи:");
+            checkNull(subtaskDescription)
+            subtask.description = subtaskDescription;
+        }
+        else {
+            subtask.description = task.description;
+        }
+        subtask.type = task.type;
+
+
+        task.subtasks.push(subtask);
+        addSubtask = confirm("Хотите ли добавить еще подзадачу?");
+    }
+    console.log(`Подзадачи для задачи "${task.title}" успешно добавлены!`);
+}
+
+
 // Функция создания задачи
 export function createTask(currentUser, project) {
     const title = prompt("Введите название задачи:");
@@ -193,7 +231,7 @@ export function createTask(currentUser, project) {
             return;
     }
     const task = new Task(title, description, deadline, priority, type);
-    task.addSubtasks();
+    addSubtasks(task);
     project.addTask(task);
     console.log(`Задача "${title}" успешно добавлена в проект "${project.name}" пользователя "${currentUser.name}"!`);
 }
@@ -1466,9 +1504,19 @@ export function changeUserData() {
 // Функция создания группы
 export function createGroup() {
     const currentUser = checkUserForProjects();
-    Group.createGroup(currentUser);
+    createGroupHere(currentUser);
 }
 
+
+function createGroupHere(currentUser) {
+    const groupName = prompt("Введите имя группы:");
+    checkNull(groupName);
+    const group = new Group(groupName);
+    group.addMember(currentUser);
+    Group.groups.push(group);
+    console.log(`Группа "${group.name}" успешно создана.`);
+    return group;
+}
 
 // Функция удаления группы
 export function deleteGroup() {
@@ -1591,7 +1639,7 @@ export function removeCurrentUserFromGroup() {
 
     const group = userGroups[groupIndex - 1];
 
-    group.removeMember(currentUser);
+    removeMember(group, currentUser);
 
     if (group.members.length === 0) {
         const groupIndexInGroups = Group.groups.indexOf(group);
@@ -1601,5 +1649,16 @@ export function removeCurrentUserFromGroup() {
         console.log(`Группа "${group.name}" удалена из-за отсутствия пользователей в ней.`);
     } else {
         console.log(`Вы покинули группу "${group.name}".`);
+    }
+}
+
+
+function removeMember(group, member) {
+    const index = group.members.indexOf(member);
+    if (index !== -1) {
+        group.members.splice(index, 1);
+        console.log(`Пользователь "${member.name}" удален из группы "${group.name}".`);
+    } else {
+        console.log(`Пользователь "${member.name}" не найден в группе "${group.name}".`);
     }
 }

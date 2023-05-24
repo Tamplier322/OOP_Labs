@@ -1,0 +1,15 @@
+{
+  "name": "oop-tests",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Also this repo for course project based on laboratory work # Class diagram ![Alt text](/classDiagram.png \"Class diagram\") # Project description This project is designed to create a to-do list, also to create your own personal project or group project, for easier tracking of completed tasks. The application will have the ability to add subtasks to existing tasks to separate them into simpler components. It will also be possible to comment on tasks and projects for a step-by-step description of the implementation of tasks.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "module": "file:scripts/module"
+  }
+}

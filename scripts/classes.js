@@ -1,4 +1,3 @@
-import { checkNull } from "./funcs.js";
 export class Task {
     constructor(title, description, deadline, priority, type) {
         this.title = title;
@@ -21,46 +20,13 @@ export class Task {
         this.deadline = newDeadline;
     }
 
-    addSubtasks() {
-        let addSubtask = confirm("Хотите ли добавить подзадачу?");
-        while (addSubtask) {
-            const subtaskTitle = prompt(`Введите название подзадачи:`);
-            checkNull(subtaskTitle)
-            const subtask = new Subtask(subtaskTitle, '', '', '', '', [], '', '');
-            const setSubtaskTime = confirm("Хотите ли установить время для подзадачи?");
-            checkNull(setSubtaskTime)
-            if (setSubtaskTime) {
-                const subtaskTime = prompt("Введите время для подзадачи:");
-                checkNull(subtaskTime)
-                subtask.dueDate = subtaskTime;
-            }
-            else {
-                subtask.dueDate = this.deadline;
-            }
-            const setSubtaskDescription = confirm("Хотите ли добавить описание для подзадачи?");
-            checkNull(setSubtaskDescription)
-            if (setSubtaskDescription) {
-                const subtaskDescription = prompt("Введите описание для подзадачи:");
-                checkNull(subtaskDescription)
-                subtask.description = subtaskDescription;
-            }
-            else {
-                subtask.description = this.description;
-            }
-            subtask.type = this.type;
-            this.subtasks.push(subtask);
-            addSubtask = confirm("Хотите ли добавить еще подзадачу?");
-        }
-        console.log(`Подзадачи для задачи "${this.title}" успешно добавлены!`);
+    addSubtask(subtask) {
+        this.subtaskIds.push(subtask.id);
     }
 
-    removeSubtask(subtaskIndex) {
-        if (subtaskIndex < 0 || subtaskIndex >= this.subtasks.length) {
-            console.log("Неверный ввод");
-            return;
-        }
-        const removedSubtask = this.subtasks.splice(subtaskIndex, 1)[0];
-        console.log(`Подзадача "${removedSubtask.title}" успешно удалена из задачи "${this.title}"`);
+    getSubtaskById(subtaskId) {
+        const subtask = this.subtasks.find(subtask => subtask.id === subtaskId);
+        return subtask;
     }
 
     addComment(comment) {
@@ -159,22 +125,6 @@ export class User {
             this.projects.splice(index, 1);
         }
     }
-
-    displayProjects() {
-        console.log(`Проекты пользователя ${this.name}:`);
-        this.projects.forEach((project, projectIndex) => {
-            console.log(`${this.name} ${projectIndex}: ${project.name}, comment - ${project.comment}`);
-        });
-    }
-
-    displayTasks(projectIndex) {
-        const project = this.projects[projectIndex];
-        console.log(`Задачи в проекте "${project.name}":`);
-        project.tasks.forEach((task) => {
-            const status = task.completed ? 'Завершено' : 'Ожидает выполнения';
-            console.log(`${this.name}: ${task.title}, ${status}, ${task.priority}`);
-        });
-    }
 }
 
 export class Group {
@@ -193,34 +143,9 @@ export class Group {
         this.members.push(user);
     }
 
-    removeMember(member) {
-        const index = this.members.indexOf(member);
-        if (index !== -1) {
-            this.members.splice(index, 1);
-            console.log(`Пользователь "${member.name}" удален из группы "${this.name}".`);
-        } else {
-            console.log(`Пользователь "${member.name}" не найден в группе "${this.name}".`);
-        }
-    }
-
     hasMember(member) {
         return this.members.includes(member);
     }
-
-    static createGroup(currentUser) {
-        const groupName = prompt("Введите имя группы:");
-        checkNull(groupName);
-
-        const group = new Group(groupName);
-
-        group.addMember(currentUser);
-
-        Group.groups.push(group);
-
-        console.log(`Группа "${group.name}" успешно создана.`);
-        return group;
-    }
-
 }
 export const users = [];
 
