@@ -7,7 +7,100 @@
 </head>
 
 <body>
+    <button id="getWorkersButton">Получить пользователей</button>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Login</th>
+                    <th>Password</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody id="dataContainer1"></tbody>
+        </table>
+    </div>
+    <button id="getDepartmentsButton">Получить проекты пользователей</button>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>К какому пользователю относиться</th>
+                </tr>
+            </thead>
+            <tbody id="dataContainer2"></tbody>
+        </table>
+    </div>
+    <button id="getTasksButton">Получить задачи пользователей</button>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>Приоритет</th>
+                    <th>К какому проекту относиться</th>
+                </tr>
+            </thead>
+            <tbody id="dataContainer3"></tbody>
+        </table>
+    </div>
+    <button id="getSubtasksButton">Получить подзадачи пользователей</button>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>Приоритет</th>
+                    <th>К какой задаче относиться</th>
+                </tr>
+            </thead>
+            <tbody id="dataContainer4"></tbody>
+        </table>
+    </div>
+    <button id="openModalButton">Открыть главное меню</button>
 
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <label for="inputValue">Что хотите сделать?</label><br>
+            <label for="inputValue">1. Добавить задание пользователя.</label><br>
+            <label for="inputValue">2. Изменить данные задач, подзадач или проектов.</label><br>
+            <label for="inputValue">3. Создать новый проект.</label><br>
+            <label for="inputValue">4. Изменить статус готовности задачи или подзадачи.</label><br>
+            <label for="inputValue">5. Вывести информацию о задачах или проектах.</label><br>
+            <label for="inputValue">6. Удалить проект, задачу или подзадачу.</label><br>
+            <label for="inputValue">7. Установить приоритет задачи или подзадачи.</label><br>
+            <label for="inputValue">8. Регистраци.</label><br>
+            <label for="inputValue">9. Добавить комментарий.</label><br>
+            <label for="inputValue">10. Удалить комментарий.</label><br>
+            <label for="inputValue">11. Добавить подзадачу к существующей задаче.</label><br>
+            <label for="inputValue">12. Вывести всех зарегистрированных пользователей.</label><br>
+            <label for="inputValue">13. Изменить данные пользователя.</label><br>
+            <label for="inputValue">14. Создать группу.</label><br>
+            <label for="inputValue">15. Удалить группу.</label><br>
+            <label for="inputValue">16. Вывести все группы.</label><br>
+            <label for="inputValue">17. Добавить пользователя в группу.</label><br>
+            <label for="inputValue">18. Удалить пользователя из группы.</label><br>
+            <label for="inputValue">111. Exit</label>
+            <br>
+            <span class="close">&times;</span>
+            <label for="inputValue">Введите значение:</label>
+            <input type="text" id="inputValue">
+            <button id="submitValue">Отправить</button>
+        </div>
+    </div>
     <script type="module" src="/scripts/app.js"></script>
 </body>
 

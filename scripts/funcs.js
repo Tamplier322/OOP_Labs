@@ -7,6 +7,7 @@ import { mainMenu } from './main-menu.js'
 import { Priority } from './classes.js'
 import { Comment } from './classes.js'
 import { Group } from './classes.js'
+import { Serializer } from './module/appSer.js'
 
 //Функция поверки на null
 export function checkNull(value) {
@@ -16,38 +17,55 @@ export function checkNull(value) {
     }
 }
 
-
 // Функция регистрации пользователя
-export function registerUser() {
+export async function registerUser() {
     const login = prompt("Введите ваш логин:");
     checkNull(login);
-    if (checkUserForRegistration(login)) {
-        mainMenu()
+
+    const loginResponse = await fetch(`http://localhost:3000/users/check?login=${login}`);
+    const loginData = await loginResponse.json();
+
+    if (loginData.exists) {
+        console.log('Пользователь с таким логином уже существует');
+        return mainMenu();
     }
 
-    else {
-        const name = prompt("Введите имя:");
-        checkNull(name);
+    const name = prompt("Введите имя:");
+    checkNull(name);
+    const surname = prompt("Введите вашу фамилию:");
+    checkNull(surname);
+    const email = prompt("Введите ваш email:");
+    checkNull(email);
+    const password = prompt("Введите пароль:");
+    checkNull(password);
 
-        const surname = prompt("Введите вашу фамилию:");
-        checkNull(surname);
+    const userData = {
+        name,
+        surname,
+        email,
+        login,
+        password
+    };
 
-        const email = prompt("Введите ваш email:");
-        checkNull(email);
+    try {
+        const response = await fetch('http://localhost:3000/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
 
-        const password = prompt("Введите пароль:");
-        checkNull(password);
-
-        const user = new User(name, surname, email, login, password);
-        console.log("Регистрация успешно завершена!");
-        console.log("Ваши данные:");
-        console.log(user);
-
-        users.push(user);
-
-        return user;
+        if (response.ok) {
+            console.log('Пользователь успешно добавлен в базу данных!');
+        } else {
+            console.error('Ошибка при добавлении пользователя в базу данных:', response.status);
+        }
+    } catch (error) {
+        console.error('Ошибка при добавлении пользователя в базу данных:', error);
     }
 }
+
 
 
 // Функция проверки существования пользователя при регистрации
@@ -234,6 +252,37 @@ export function createTask(currentUser, project) {
     addSubtasks(task);
     project.addTask(task);
     console.log(`Задача "${title}" успешно добавлена в проект "${project.name}" пользователя "${currentUser.name}"!`);
+
+    const taskData = {
+        title: task.title,
+        description: task.description,
+        deadline: task.deadline,
+        priority: task.priority,
+        type: task.type,
+        project_id: "2"
+    };
+
+    fetch('http://localhost:3000/tasks', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log('Задача успешно добавлена в базу данных!');
+                // Дополнительный код для обработки успешного добавления задачи
+            } else {
+                console.error('Ошибка при добавлении задачи в базу данных:', response.status);
+                // Дополнительный код для обработки ошибки добавления задачи
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при добавлении задачи в базу данных:', error);
+            // Дополнительный код для обработки ошибки добавления задачи
+        });
+
 }
 
 
@@ -1662,3 +1711,6 @@ function removeMember(group, member) {
         console.log(`Пользователь "${member.name}" не найден в группе "${group.name}".`);
     }
 }
+
+
+

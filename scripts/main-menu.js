@@ -31,12 +31,35 @@ export let choose = "0"
 
 
 
-export function mainMenu() {
-    choose = prompt(choose_text)
-    if (choose == "111") {
+const openModalButton = document.getElementById('openModalButton');
+const modal = document.getElementById('myModal');
+const closeModal = document.getElementsByClassName('close')[0];
+const submitButton = document.getElementById('submitValue');
+const inputField = document.getElementById('inputValue');
+
+openModalButton.addEventListener('click', () => {
+    modal.style.display = 'block';
+});
+
+closeModal.addEventListener('click', () => {
+    modal.style.display = 'none';
+});
+let variable
+
+submitButton.addEventListener('click', () => {
+    const value = inputField.value;
+
+    variable = parseInt(value)
+    mainMenu(value)
+    inputField.value = '';
+    modal.style.display = 'none';
+});
+
+export function mainMenu(value) {
+    if (value == "111") {
         return;
     }
-    switch (choose) {
+    switch (value) {
         case "1":
             addTaskToCurrentUser();
             break;
@@ -91,7 +114,5 @@ export function mainMenu() {
         case "18":
             removeCurrentUserFromGroup();
             break;
-
     }
-    mainMenu()
 }
